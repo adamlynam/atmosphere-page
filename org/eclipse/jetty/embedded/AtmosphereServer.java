@@ -11,13 +11,17 @@ import org.eclipse.jetty.websocket.servlet.WebSocketServletFactory;
 import java.io.File;
 
 public class AtmosphereServer {
+
+    public static final String DOMAIN = "lynam.co.nz";
+    public static final int PORT = 9090;
+
     public static void main(String[] args) throws Exception {
-        Server server = new Server(8080);
+        Server server = new Server(PORT);
 
         HandlerList handlers = new HandlerList();
         handlers.setHandlers(new Handler[] {
             getWebSocketHandler(),
-            new FastFileHandler(new File("index.html")),
+            new FastFileHandler(new File("index.html"), DOMAIN, PORT),
             new DefaultHandler()
         });
         server.setHandler(handlers);
@@ -32,12 +36,5 @@ public class AtmosphereServer {
                 factory.register(WebSocketManager.class);
             }
         };
-    }
-
-    private static ResourceHandler getStaticResourcesHandlers() {
-        ResourceHandler resourceHandler = new ResourceHandler();
-        resourceHandler.setDirectoriesListed(true);
-        resourceHandler.setResourceBase("index.html");
-        return resourceHandler;
     }
 }

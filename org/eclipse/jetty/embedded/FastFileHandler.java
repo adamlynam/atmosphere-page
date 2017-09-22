@@ -15,10 +15,14 @@ import java.nio.file.StandardOpenOption;
 class FastFileHandler extends AbstractHandler
 {
     private final File file;
+    private String domain;
+    private int port;
 
-    public FastFileHandler(File file)
+    public FastFileHandler(File file, String domain, int port)
     {
         this.file = file;
+        this.domain = domain;
+        this.port = port;
     }
 
     @Override
@@ -32,7 +36,7 @@ class FastFileHandler extends AbstractHandler
         baseRequest.setHandled(true);
         response.setContentType("text/html");
         response.setHeader("Content-Security-Policy", "default-src 'self'");
-        response.setHeader("Content-Security-Policy", "connect-src ws://localhost:8080");
+        response.setHeader("Content-Security-Policy", "connect-src ws://" + domain + ":" + port);
         // need to caste to Jetty output stream for best API
         ((HttpOutput) response.getOutputStream())
                 .sendContent(FileChannel.open(file.toPath(),
