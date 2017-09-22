@@ -7,11 +7,16 @@ import org.eclipse.jetty.websocket.api.annotations.OnWebSocketError;
 import org.eclipse.jetty.websocket.api.annotations.OnWebSocketMessage;
 import org.eclipse.jetty.websocket.api.annotations.WebSocket;
 
+import java.util.ArrayList;
+import java.util.List;
+import java.util.UUID;
+
 @WebSocket(maxTextMessageSize = 10000000, maxBinaryMessageSize = 10000000)
 public class WebSocketManager {
 
     private Session session;
-    private ChatRoom room = ChatRoom.getInstance();
+    private ChatRoomManager roomManager = ChatRoomManager.getInstance();
+    private ChatRoom room;
 
     @OnWebSocketClose
     public void onClose(int statusCode, String reason) {
@@ -26,7 +31,17 @@ public class WebSocketManager {
     @OnWebSocketConnect
     public void onConnect(Session session) {
         this.session = session;
-        room.addClient(this.session);
+        if (session.getUpgradeRequest().getRequestURI().getPath().contains("/room/")) {
+            // member path
+            room = roomManager.getRoom(UUID.fromString(session.getUpgradeRequest().getRequestURI().getPath().split("/")[2]));
+            room.addClient(this.session);
+        }
+        else {
+            // host path
+            room = roomManager.createNewRoom();
+            room.addClient(this.session);
+            room.messageAllClients("{\"type\": \"room\", \"data\": \"" + room.getUuid().toString() + "\"}");
+        }
     }
 
     @OnWebSocketMessage

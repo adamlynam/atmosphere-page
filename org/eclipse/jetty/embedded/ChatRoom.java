@@ -4,19 +4,19 @@ import org.eclipse.jetty.websocket.api.Session;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.UUID;
 
 public class ChatRoom {
-    private static ChatRoom instance = null;
+    private ArrayList<Session> clients = new ArrayList<>();
+    private UUID uuid;
 
-    public static ChatRoom getInstance() {
-        if (instance == null){
-            instance = new ChatRoom();
-        }
-
-        return instance;
+    public ChatRoom(UUID uuid) {
+        this.uuid = uuid;
     }
 
-    ArrayList<Session> clients = new ArrayList<>();
+    public UUID getUuid() {
+        return uuid;
+    }
 
     public void messageAllClients(String message) {
         for (Session client : clients) {

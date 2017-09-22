@@ -1,12 +1,25 @@
 <html>
-    <input type="file" id="input"/>
+    <div>
+        <p id="room-status">Not connected to a room, connecting...</p>
+        <a id="room-link" target="_blank" href="#"></a>
+    </div>
+    <input id="uploader" style="display: none;" type="file" id="input"/>
     <script type="text/javascript">
-    function receiveFile(file) {
+    function parseMessage(file) {
         console.log(file);
-        if (file.type.indexOf('audio') != -1)
+        if (file.type.indexOf('room') != -1)
+            roomCreated(file.data);
+        else if (file.type.indexOf('audio') != -1)
             soundUploaded(file.data);
         else if (file.type.indexOf('image') != -1)
             imageUploaded(file.data);
+    }
+
+    function roomCreated(data) {
+        document.getElementById('room-status').innerHTML = 'Connected to room ' + data;
+        document.getElementById('room-link').href = location.origin + location.pathname + 'room/' + data;
+        document.getElementById('room-link').innerHTML = location.origin + location.pathname + 'room/' + data;
+        document.getElementById('uploader').style = "";
     }
 
     function soundUploaded(data) {
@@ -25,20 +38,18 @@
     }
 
     function connectToServer() {
-        var connection = new WebSocket('ws://' + location.host);
+        var connection = new WebSocket('ws://' + location.host + location.pathname);
         connection.onmessage = event => {
-            receiveFile(JSON.parse(event.data));
+            parseMessage(JSON.parse(event.data));
         }
         connection.onclose = event => {
-            console.log("WebSocket disconnected, reconnecting...");
+            document.getElementById('room-status').innerHTML = 'Disconnected, reconnecting...';
             window.connection = connectToServer();
         }
         return connection;
     }
 
-    window.connection = connectToServer();
-
-    input.onchange = function(e){
+    document.getElementById('uploader').onchange = function(e){
         var type = this.files[0].type;
         var reader = new FileReader();
         reader.onload = function(e) {
@@ -49,5 +60,7 @@
         };
         reader.readAsDataURL(this.files[0]);
     }
+
+    window.connection = connectToServer();
     </script>
 </html>
