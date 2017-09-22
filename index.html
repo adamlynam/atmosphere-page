@@ -19,7 +19,6 @@
         document.getElementById('room-status').innerHTML = 'Connected to room ' + data;
         document.getElementById('room-link').href = location.origin + location.pathname + 'room/' + data;
         document.getElementById('room-link').innerHTML = location.origin + location.pathname + 'room/' + data;
-        document.getElementById('uploader').style = "";
     }
 
     function soundUploaded(data) {
@@ -62,5 +61,8 @@
     }
 
     window.connection = connectToServer();
+    if (location.pathname == "/") {
+        document.getElementById('uploader').style = "";
+    }
     </script>
 </html>

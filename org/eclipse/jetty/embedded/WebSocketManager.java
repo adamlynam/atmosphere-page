@@ -34,14 +34,13 @@ public class WebSocketManager {
         if (session.getUpgradeRequest().getRequestURI().getPath().contains("/room/")) {
             // member path
             room = roomManager.getRoom(UUID.fromString(session.getUpgradeRequest().getRequestURI().getPath().split("/")[2]));
-            room.addClient(this.session);
         }
         else {
             // host path
             room = roomManager.createNewRoom();
-            room.addClient(this.session);
-            room.messageAllClients("{\"type\": \"room\", \"data\": \"" + room.getUuid().toString() + "\"}");
         }
+        room.addClient(this.session);
+        room.messageAllClients("{\"type\": \"room\", \"data\": \"" + room.getUuid().toString() + "\"}");
     }
 
     @OnWebSocketMessage
