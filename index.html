@@ -1,0 +1,53 @@
+<html>
+    <input type="file" id="input"/>
+    <script type="text/javascript">
+    function receiveFile(file) {
+        console.log(file);
+        if (file.type.indexOf('audio') != -1)
+            soundUploaded(file.data);
+        else if (file.type.indexOf('image') != -1)
+            imageUploaded(file.data);
+    }
+
+    function soundUploaded(data) {
+        var sound = document.createElement('audio');
+        sound.src = data;
+        sound.play();
+        // not really needed in this exact case, but since it is really important in other cases,
+        // don't forget to revoke the blobURI when you don't need it
+        sound.onend = function(e) {
+            URL.revokeObjectURL(this.src);
+        }
+    }
+
+    function imageUploaded(data) {
+        document.getElementsByTagName("BODY")[0].style.backgroundImage = 'url(' + data + ')';
+    }
+
+    function connectToServer() {
+        var connection = new WebSocket('ws://' + location.host);
+        connection.onmessage = event => {
+            receiveFile(JSON.parse(event.data));
+        }
+        connection.onclose = event => {
+            console.log("WebSocket disconnected, reconnecting...");
+            window.connection = connectToServer();
+        }
+        return connection;
+    }
+
+    window.connection = connectToServer();
+
+    input.onchange = function(e){
+        var type = this.files[0].type;
+        var reader = new FileReader();
+        reader.onload = function(e) {
+            window.connection.send(JSON.stringify({
+                type: type,
+                data: this.result
+            }));
+        };
+        reader.readAsDataURL(this.files[0]);
+    }
+    </script>
+</html>
